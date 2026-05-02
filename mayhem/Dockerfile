@@ -15,7 +15,7 @@
 ################################################################################
 
 FROM gcr.io/oss-fuzz-base/base-builder
-RUN apt-get update && apt-get install -y make cmake python python-setuptools
+RUN apt-get update && apt-get install -y make cmake python3-setuptools python-is-python3
 COPY . capstonev4
 RUN rm -rf capstonev4/mayhem
 RUN git clone --depth 1 --branch next https://github.com/aquynh/capstone.git capstonenext

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # Test tool to compare Capstone output with llvm-mc. By Nguyen Anh Quynh, 2014
 import sys
 import os
@@ -10,16 +10,16 @@ def test_file(fname):
     lines = f.readlines()
     f.close()
 
-    if not lines[0].startswith('# '):
+    if not lines[0].startswith("# "):
         print("ERROR: decoding information is missing")
         return
 
-    # skip '# ' at the front, then split line to get out hexcode
-    # Note: option can be '', or 'None'
+    # skip "# " at the front, then split line to get out hexcode
+    # Note: option can be "", or "None"
     #print lines[0]
-    #print lines[0][2:].split(', ')
-    (arch, mode, option) = lines[0][2:].split(', ')
-    mode = mode.replace(' ', '')
+    #print lines[0][2:].split(", ")
+    (arch, mode, option) = lines[0][2:].split(", ")
+    mode = mode.replace(" ", "")
     option = option.strip()
 
     archs = {
@@ -89,41 +89,36 @@ def test_file(fname):
         ("CS_ARCH_EVM", "0"): 25,
     }
 
-    #if not option in ('', 'None'):
-    #    print archs[arch], modes[mode], options[option]
-
     for line in lines[1:]:
         # ignore all the input lines having # in front.
-        if line.startswith('#'):
+        if line.startswith("#"):
             continue
-        if line.startswith('// '):
+        if line.startswith("// "):
             line=line[3:]
-        #print("Check %s" %line)
-        code = line.split(' = ')[0]
+        code = line.split(" = ")[0]
         if len(code) < 2:
             continue
-        if code.find('//') >= 0:
+        if code.find("//") >= 0:
             continue
-        hex_code = code.replace('0x', '')
-        hex_code = hex_code.replace(',', '')
+        hex_code = code.replace("0x", "")
+        hex_code = hex_code.replace(",", "")
         try:
-            hex_data = hex_code.strip().decode('hex')
-        except:
-            print "skipping", hex_code
-        fout = open("fuzz/corpus/%s_%s" % (os.path.basename(fname), hex_code), 'w')
+            hex_data = bytes.fromhex(hex_code.strip())
+        except Exception:
+            print("skipping", hex_code)
+            continue
+        fout = open("fuzz/corpus/%s_%s" % (os.path.basename(fname), hex_code.strip()), "wb")
         if (arch, mode) not in mc_modes:
-            print "fail", arch, mode
-        fout.write(unichr(mc_modes[(arch, mode)]))
+            print("fail", arch, mode)
+        fout.write(bytes([mc_modes[(arch, mode)]]))
         fout.write(hex_data)
         fout.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) == 1:
         fnames = sys.stdin.readlines()
         for fname in fnames:
             test_file(fname.strip())
     else:
-        #print("Usage: ./test_mc.py <input-file.s.cs>")
         test_file(sys.argv[1])
-

@@ -29,7 +29,7 @@ do
 
     cd $SRC/capstone$branch/bindings/python
     #better debug info
-    sed -i -e 's/#print/print/' capstone/__init__.py
+    sed -i -e s/#print/print/ capstone/__init__.py
     (
     export CFLAGS=""
     export AFL_NOOPT=1
@@ -37,7 +37,8 @@ do
     )
     cd $SRC/capstone$branch/suite
     mkdir fuzz/corpus
-    find MC/ -name *.cs | ./test_corpus.py
+    CORPUS_SCRIPT=$(ls test_corpus3.py test_corpus.py 2>/dev/null | head -1)
+    find MC/ -name "*.cs" | python3 "$CORPUS_SCRIPT"
     cd fuzz
     zip -r fuzz_disasm"$branch"_seed_corpus.zip corpus/
     cp fuzz_disasm"$branch"_seed_corpus.zip $OUT/
